@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OLC2 Simulator - ARMv8 64bits </title>
+    <link href="files/styles.css" rel="stylesheet" /> 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script
+      src="https://kit.fontawesome.com/7e5b2d153f.js"
+      crossorigin="anonymous">
+    </script>
+  </head>
+  <body>
+    <section id="consola" >
+      <div class="main">
+        <center>
+            <img src="files/ARMv8.png" width="15%" height="15%">
+        </center>
+        <div class="div-padre">
+            <div class="div-botons">
+                <button class="boton" onclick="addPestaña()">Crear Pestaña</button>
+                <button class="boton" onclick="delPestaña()">Eliminar Pestaña</button>
+                <button class="boton" onclick="ErrorReporte()">Reporte Errores</button>
+                <button class="boton" onclick="TablaReporte()">Tabla Simbolos</button>
+                <button class="boton" onclick="">Reporte CST</button>
+                <div class="file-input-container">
+                    <input type="file" class="file-input" id="file-input" onchange="loadFile(this.files[0])">
+                    <label for="file-input" class="file-label">
+                        <i class="fas fa-upload"></i> Cargar Archivo
+                    </label>
+                </div>
+                <script>
+                    function loadFile(file) {
+                        console.log("Archivo seleccionado:", file);
+                        // Aquí puedes agregar la lógica para manejar el archivo
+                    }
+                </script>
+            <div class="input-group">
+                <input type="text" class="input" id="filename" name="filename" placeholder="Nombre archivo" autocomplete="off">
+                <button id="descargar" onclick="guardarArchivo()" class="button--submit">
+                    <i class="fas fa-save"></i> Guardar Archivo
+                </button>
+            </div>
+            </div>
+        </div>
+        <div class="div-pestañas" id="div-pestañas">
+            <button class="pes selected" onclick="selectAndGoToTab(this, 0)">1</button>
+        </div>
+        <script>
+            function selectButton(button) {
+                // Quita la clase 'selected' de todos los botones
+                var buttons = document.querySelectorAll('.pes');
+                buttons.forEach(function(btn) {
+                    btn.classList.remove('selected');
+                });
+    
+                // Añade la clase 'selected' al botón clicado
+                button.classList.add('selected');
+            }
+        </script>
+        <div class="div-cuerpo">
+          <div id="tCard">
+            <div class="card">
+              <div class="tools">
+                <div class="circle">
+                  <span class="red box"></span>
+                </div>
+                <div class="circle">
+                  <span class="yellow box"></span>
+                </div>
+                <div class="circle">
+                  <span class="green box"></span>
+                </div>
+              </div>
+              
+              <div class="card__content">
+                  <textarea id="output" onkeyup="loadPestaña()" class="texto_ingresado" placeholder="Entrada"></textarea>
+              </div>
+            </div>
+            <div class="card">
+              <div class="tools">
+                <div class="circle">
+                  <span class="red box"></span>
+                </div>
+                <div class="circle">
+                  <span class="yellow box"></span>
+                </div>
+                <div class="circle">
+                  <span class="green box"></span>
+                </div>
+              </div>
+              
+              <div class="card__content">
+                <textarea class="editor"  id = "editor" placeholder="Consola"></textarea>
+              </div>
+            </div>
+
+    
+      
+            <!--<textarea class="texto_ingresado" placeholder="Hola Mundo!"></textarea>
+              <iframe onkeyup="actualizar()" class="editor" id="editor" srcdoc="<font color = white FACE = arial>Resultados aqui \n hola</font>"></iframe>
+            <iframe class="editor" id="editor" srcdoc="Resultados aqui"></iframe>-->
+
+          </div>
+          <div class="configuraciones">
+            <button id="btnConsola" onclick="check()" class="game-button">
+              <svg class="play-icon" viewBox="0 0 40 40">
+                  <path d="M 10,10 L 30,20 L 10,30 z"></path>
+              </svg>
+              Simular
+            </button>
+          </div>
+          
+        </div>
+      </div>
+    </section>
+    <section id="ERRORES" hidden>
+      <div class="container">
+        <div class="mt-5 mb-5">
+            <h1><center>Reporte Errores</center></h1>
+        </div>
+        <div class="row">
+            
+            <div >
+                <div id="studentsTable">
+                    <table class="table table-striped">
+                        <thead >
+                            <tr >
+                                <th scope="col" class="encadezado">No.</th>
+                                <th scope="col" class="encadezado">Tipo de Error</th>
+                                <th scope="col" class="encadezado">Descripcion</th>
+                                <th scope="col" class="encadezado">Linea</th>
+                                <th scope="col" class="encadezado">Columna</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div>
+          <button id="btnErrores" onclick="hideErrores()" class="game-button">Regresar</button>
+        </div>
+
+      </div>
+    </section>
+  
+    <section id="TablaS" hidden>
+      <div class="container">
+        <div class="mt-5 mb-5">
+            <h1><center>Tabla de Simbolos</center></h1>
+        </div>
+        <div class="row">
+            
+            <div >
+                <div id="SymbolTable">
+                    <table class="table table-striped">
+                        <thead >
+                            <tr >
+                                <th scope="col" class="encadezado">Identificador</th>
+                                <th scope="col" class="encadezado">Tipo</th>
+                                <th scope="col" class="encadezado">DataType</th>
+                                <th scope="col" class="encadezado">Entorno</th>
+                                <th scope="col" class="encadezado">Linea</th>
+                                <th scope="col" class="encadezado">Columna</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div>
+          <button id="btnTable" onclick="hideTable()" class="game-button">Regresar</button>
+        </div>
+
+      </div>
+    </section>
+
+    
+    <!-- JQUERY -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" 
+    integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" 
+    crossorigin="anonymous"></script>
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://unpkg.com/@hpcc-js/wasm@0.3.11/dist/index.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.16.0/d3.min.js" integrity="sha512-FHsFVKQ/T1KWJDGSbrUhTJyS1ph3eRrxI228ND0EGaEp6v4a/vGwPWd3Dtd/+9cI7ccofZvl/wulICEurHN1pg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://unpkg.com/d3-graphviz@3.0.5/build/d3-graphviz.js"></script>
+    <!-- ============================= FUNCIONES EXTRAS ============================== -->
+    <script src="index.js"></script>
+    <!-- ============================= PARSER ============================== -->
+    <script src="parser.js"></script>
+    <!-- ============================= SCRIPT ============================== -->
+    <script src="sim.js"></script>
+    
+    <center>Organización de Lenguajes y Compiladores 2 - Vacaciones Junio 2024 - Grupo 10</center>
+  </body>
+  
+</html>
