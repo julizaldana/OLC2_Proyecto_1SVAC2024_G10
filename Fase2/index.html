@@ -5,8 +5,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>OLC2 Simulator - ARMv8 64bits </title>
-    <link href="Fase1/files/styles.css" rel="stylesheet" /> 
+    <link href="files/styles.css" rel="stylesheet" /> 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
     <script
       src="https://kit.fontawesome.com/7e5b2d153f.js"
       crossorigin="anonymous">
@@ -16,33 +17,25 @@
     <section id="consola" >
       <div class="main">
         <center>
-            <img src="Fase1/files/ARMv8.png" width="15%" height="15%">
+            <img src="files/ARMv8.png" width="15%" height="15%">
         </center>
         <div class="div-padre">
             <div class="div-botons">
+              <input type="file" id="file-input" class="hidden" onchange="loadFile(event)">
+              <button class="boton" id="cargar" onclick="triggerFileInput()">
+                <i class="fas fa-upload"></i> Cargar Archivo
+              </button>
+              <button class="boton" id="descargar" onclick="handleSave()">
+                  <i class="fas fa-save"></i> Guardar Archivo
+              </button>
+              <button class="boton" onclick="clearEditor()">
+                <i class="fas fa-broom"></i> Limpiar Editor
+              </button>
                 <button class="boton" onclick="addPestaña()">Crear Pestaña</button>
                 <button class="boton" onclick="delPestaña()">Eliminar Pestaña</button>
                 <button class="boton" onclick="ErrorReporte()">Reporte Errores</button>
                 <button class="boton" onclick="TablaReporte()">Tabla Simbolos</button>
                 <button class="boton" onclick="">Reporte CST</button>
-                <div class="file-input-container">
-                    <input type="file" class="file-input" id="file-input" onchange="loadFile(this.files[0])">
-                    <label for="file-input" class="file-label">
-                        <i class="fas fa-upload"></i> Cargar Archivo
-                    </label>
-                </div>
-                <script>
-                    function loadFile(file) {
-                        console.log("Archivo seleccionado:", file);
-                        // Aquí puedes agregar la lógica para manejar el archivo
-                    }
-                </script>
-            <div class="input-group">
-                <input type="text" class="input" id="filename" name="filename" placeholder="Nombre archivo" autocomplete="off">
-                <button id="descargar" onclick="guardarArchivo()" class="button--submit">
-                    <i class="fas fa-save"></i> Guardar Archivo
-                </button>
-            </div>
             </div>
         </div>
         <div class="div-pestañas" id="div-pestañas">
@@ -50,13 +43,10 @@
         </div>
         <script>
             function selectButton(button) {
-                // Quita la clase 'selected' de todos los botones
                 var buttons = document.querySelectorAll('.pes');
                 buttons.forEach(function(btn) {
                     btn.classList.remove('selected');
                 });
-    
-                // Añade la clase 'selected' al botón clicado
                 button.classList.add('selected');
             }
         </script>
@@ -75,7 +65,7 @@
                 </div>
               </div>
               
-              <div class="card__content">
+              <div class="card__contents">
                   <textarea id="output" onkeyup="loadPestaña()" class="texto_ingresado" placeholder="Entrada"></textarea>
               </div>
             </div>
@@ -90,19 +80,51 @@
                 <div class="circle">
                   <span class="green box"></span>
                 </div>
+                  <button class="newconsole" id="btn-gramatica">Gramática</button>
+                  <button class="newconsole" id="btn-cuadruplos">Cuádruplos</button>
+                  <button class="newconsole" id="btn-interprete">Intérprete</button>
               </div>
-              
-              <div class="card__content">
-                <textarea class="editor"  id = "editor" placeholder="Consola"></textarea>
+
+              <div class="card__content" id="content-gramatica">
+                <textarea class="editor" id="editor" placeholder="Gramática"></textarea>
+              </div>
+              <div class="card__content" id="content-cuadruplos">
+                <textarea class="editor" id="cuadruplos" placeholder="Cuádruplos"></textarea>
+              </div>
+              <div class="card__content" id="content-interprete">
+                <textarea class="editor" id="interprete" placeholder="Intérprete"></textarea>
               </div>
             </div>
 
-    
+            <script>
+              document.getElementById('btn-gramatica').addEventListener('click', function() {
+                  mostrarConsola('content-gramatica');
+              });
       
-            <!--<textarea class="texto_ingresado" placeholder="Hola Mundo!"></textarea>
-              <iframe onkeyup="actualizar()" class="editor" id="editor" srcdoc="<font color = white FACE = arial>Resultados aqui \n hola</font>"></iframe>
-            <iframe class="editor" id="editor" srcdoc="Resultados aqui"></iframe>-->
+              document.getElementById('btn-cuadruplos').addEventListener('click', function() {
+                  mostrarConsola('content-cuadruplos');
+              });
+      
+              document.getElementById('btn-interprete').addEventListener('click', function() {
+                  mostrarConsola('content-interprete');
+              });
+      
+              function mostrarConsola(id) {
+                  // Ocultar todos los textareas
+                  const contents = document.querySelectorAll('.card__content');
+                  contents.forEach(content => {
+                      content.classList.remove('active');
+                  });
+      
+                  // Mostrar el textarea correspondiente
+                  document.getElementById(id).classList.add('active');
+              }
+      
+              // Mostrar por defecto el primer textarea
+              document.getElementById('content-gramatica').classList.add('active');
+          </script>
 
+  
           </div>
           <div class="configuraciones">
             <button id="btnConsola" onclick="check()" class="game-button">
@@ -184,7 +206,6 @@
     </section>
 
     
-    <!-- JQUERY -->
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" 
     integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" 
     crossorigin="anonymous"></script>
@@ -194,11 +215,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.16.0/d3.min.js" integrity="sha512-FHsFVKQ/T1KWJDGSbrUhTJyS1ph3eRrxI228ND0EGaEp6v4a/vGwPWd3Dtd/+9cI7ccofZvl/wulICEurHN1pg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://unpkg.com/d3-graphviz@3.0.5/build/d3-graphviz.js"></script>
     <!-- ============================= FUNCIONES EXTRAS ============================== -->
-    <script src="Fase1/index.js"></script>
+    <script src="src/index.js"></script>
     <!-- ============================= PARSER ============================== -->
-    <script src="Fase1/parser.js"></script>
+    <script src="parser/parser.js"></script>
     <!-- ============================= SCRIPT ============================== -->
-    <script src="Fase1/sim.js"></script>
+    <script src="src/sim.js"></script>
     
     <center>Organización de Lenguajes y Compiladores 2 - Vacaciones Junio 2024 - Grupo 10</center>
   </body>

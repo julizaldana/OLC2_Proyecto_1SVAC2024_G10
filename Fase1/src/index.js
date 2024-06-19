@@ -4,11 +4,25 @@ let cuerpoAst = "";
 let cuerpoTable = [];
 
 
-async function loadFile(file) {
-    let text = await file.text();
-    document.getElementById('output').value = text;
+//-------------------CARGA DE ARCHIVOS
+function triggerFileInput() {
+  document.getElementById('file-input').click();
 }
 
+async function loadFile(event) {
+  const file = event.target.files[0];
+  if (file) {
+      const text = await file.text();
+      document.getElementById('output').value = text;
+  } else {
+      alert("No se seleccionó ningún archivo");
+  }
+}
+
+//-------------------LIMPIEZA DE CONSOLA
+function clearEditor() {
+  document.getElementById('output').value = "";
+}
 
 
 //-----------------------------#MANEJO DE PESTAÑAS
@@ -79,30 +93,41 @@ let pestañas = [];
             pestañas[indice] = document.getElementById("output").value;
         }
 
-        function guardarArchivo() {
-            const contenido = document.getElementById('output').value;
-            console.log(contenido);
-            const nombre = 'archivo.txt';
-            guardarArchivos(contenido, nombre);
+
+//-------------------FUNCION PARA GUARDAR UN ARCHIVO
+
+      function handleSave() {
+        //obtener datos de text area
+        const content = document.getElementById('output').value;
+        
+        //comprobar si no esta vacio
+        if (content === "") {
+            alert("El textarea está vacío. Ingrese algún texto para guardar.");
+            return;
         }
 
-        function guardarArchivos(contenido, nombre) {
-            const a = document.createElement("a");
-            const archivo = new Blob([contenido], { type: 'text/plain' });
-            const url = URL.createObjectURL(archivo);
-            a.href = url;
-            a.download = nombre;
-            a.click();
-            URL.revokeObjectURL(url);
+        const fileName = window.prompt("Ingrese el nombre para el archivo:");
+        if (!fileName) {
+            alert("Debe ingresar un nombre para el archivo.");
+            return;
         }
 
-        const download = (name, content) => {
-          let blob = new Blob([content], {type: 'text/plain;charset=utf-8'})
-          let link = document.getElementById('download');
-          link.href = URL.createObjectURL(blob);
-          link.setAttribute("download", name)
-          link.click()
-      }
+        // se crea un objeto Blob con el contenido del archivo
+        const file = new Blob([content], { type: 'text/plain;charset=utf-8' });
+
+        // nuevo enlace para descargar el archivo
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(file);
+        link.download = fileName + '.s';  
+
+        // Simular un clic en el enlace para descargar el archivo
+        link.click();
+
+        // Liberar el objeto URL
+        URL.revokeObjectURL(link.href);
+    }
+
+
 
 
 
@@ -139,30 +164,33 @@ function actualizar(){
 
 //-----------------------------#MANEJO DE ARCHIVOS
 
-function ErrorReporte(){
-  this.ocultar("consola","ERRORES");
+function ErrorReporte() {
   let cuerpo = "";
-  console.log(errores)
-  if(errores != "ninguno"){
-    console.log(errores.length)
-  for(var i = 0; i < errores.length; i++){
-    let cadena = errores[i].toString();
-    let columnas = cadena.split(","); 
-    cuerpo += `
+  if (errores2.length > 0) {
+      for (var i = 0; i < errores2.length; i++) {
+          let error = errores2[i];
+          cuerpo += `
+              <tr>
+                  <td>${i + 1}</td>
+                  <td>${error.tipo}</td>
+                  <td>${error.descripcion}</td>
+                  <td>${error.linea}</td>
+                  <td>${error.columna}</td>
+              </tr>
+          `;
+      }
+  } else {
+      cuerpo = `
+          <tr>
+              <td colspan="5">No se encontraron errores2</td>
+          </tr>
+      `;
+  }
 
-    <tr>
-      <td>${i}</td>
-      <td>${columnas[0]}</td>
-      <td>${columnas[1]}</td>
-      <td>${columnas[2]}</td>
-      <td>${columnas[3]}</td>
-    </tr>
-`;
-  }
-  $('#studentsTable tbody').html(cuerpo)
-  }
-  
+  document.querySelector('#studentsTable tbody').innerHTML = cuerpo;
+  document.getElementById("ERRORES").removeAttribute("hidden");
 }
+
 
 
 function TablaReporte(){
@@ -224,3 +252,5 @@ function ocultar(sec1, sec2){
   const secErrores = document.getElementById(sec2);
   secErrores.hidden = false;
 }
+
+
